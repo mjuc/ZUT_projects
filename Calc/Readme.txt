@@ -13,3 +13,4 @@ klasy - camel od dużej
 funkcje - camel od małej
 zmienne - małe litery, rozdzielenie podkreślnikami
 GUI
+bloki try-catch w testach

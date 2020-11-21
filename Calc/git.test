@@ -2,3 +2,5 @@ test connection
 test local
 testcomm
 test 2
+
+new remote

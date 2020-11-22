@@ -1,6 +1,8 @@
 import calc
 from termcolor import colored
 
+
+
 class FuncTests:
     # method printing results of tests
     def print_result(self,test,res_string,result):

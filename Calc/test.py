@@ -1,7 +1,7 @@
 import calc
 import function_tests
 
-# Calculator test instance
+# Calc test instance
 clc = calc.Calc()
 FncTests = function_tests.FuncTests()
 

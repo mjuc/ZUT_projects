@@ -1,0 +1,12 @@
+Testy metod:
+  automatyczne testy metod obsługujących funkcje matematyczne
+  automatyczne testy metod obsługujących zarządzanie pamięcią
+  automatyczne testy metod obsługujących funkcje logiczne
+  
+Testy UI:
+  Wprowadzanie danych:
+    testy wprowadzania danych z klawiatury
+    test działania funcji kopiuj/wklej
+  test poprawności wyświetlania danych(test manualny)
+  testy działania przycisków wywołujących metody
+ 

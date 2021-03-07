@@ -1,0 +1,5 @@
+D: minimalizacja wszystkiego
+DL: undo
+DR: redo
+U R: task manager
+L DL D DR R: cortana

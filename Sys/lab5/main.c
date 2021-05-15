@@ -69,6 +69,8 @@ int main(int argc,char **argv)
             children++;
             if(pid==0)
             {
+                sig.sa_sigaction=interrupt_handler;
+                sigaction(SIGINT,&sig,NULL);
                 random = rand()% max_duration;
                 int tmp=1;
                 int cpid=getpid();

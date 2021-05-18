@@ -1,3 +1,6 @@
+//PS IN1 320 LAB06
+//Michał Jucewicz
+//jm44353@zut.edu.pl
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>

@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -6,6 +8,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <signal.h>
+#include <crypt.h>
 
 pthread_mutex_t lock;
 int decrypt;
@@ -46,31 +50,37 @@ void *decrypt_block(void *arg)
     args *ar = (args *)arg;
     int step=sizeof(char);
     char *temp;
-    char *enc;
+    struct crypt_data enc;
     int l;
     long i=ar->block_start;
+    pthread_mutex_lock(&lock);
     decrypt=1;
-    while (i<ar->block_end && decrypt)    
+    pthread_mutex_unlock(&lock);
+    while (i<ar->block_end && decrypt==1)    
     {
         l = 0;
         while (ar->map[i+l] != '\n')
         {
             l++;
         }
-        pthread_mutex_lock(&lock);
         temp=(char *)malloc(sizeof(char)*l);
         for(int j=0;j<l;j++)
         {
             temp[j]=ar->map[i+j];
         }
-        enc=crypt(temp,ar->salt);
-        if(strcmp(enc,ar->target)==0 && ar->benchmark_flag == 0)
+        crypt_r(temp,ar->salt,&enc);
+        if(strcmp(enc.output,ar->target)==0 && ar->benchmark_flag == 0)
         {
             printf("Password found: %s\n",temp);
             decrypt=0;
-            break;
+            free(temp);
+            exit(0);
         }
-        pthread_mutex_unlock(&lock);
+        free(temp);
+        if(decrypt==0)
+        {
+            pthread_exit(0);
+        }
         i+=(l+1);
     }
 }
@@ -124,6 +134,8 @@ int decryption(char *passwd,int threads,char *filename,int benchmark_flag)
     {
         printf("Password not found in dictionary\n");
     }
+    free(thrds);
+    free(arguments);
 }
 
 int main(int argc,char **argv)
@@ -160,22 +172,32 @@ int main(int argc,char **argv)
     if(benchmark_flag)
     {
         printf("Benchmark\n");
-        clock_t *results;
-        results=(clock_t *)malloc(sizeof (clock_t)*max_thrds);
-        clock_t start,end;
+        struct timespec *results;
+        results=(struct timespec *)malloc(sizeof (struct timespec)*max_thrds);
+        struct timespec start, end;
         for(int i=0;i<max_thrds;i++)
         {
             printf("\rTesting for %d out of %d available threads",i+1,max_thrds);
             fflush(stdout);
-            start=clock();
+            clock_gettime(CLOCK_REALTIME,&start);
             decryption(passwd,i+1,filename,benchmark_flag);
-            end=clock();
-            results[i]=end-start;
+            clock_gettime(CLOCK_REALTIME,&end);
+            end.tv_sec=end.tv_sec-start.tv_sec;
+            if(end.tv_nsec>start.tv_nsec)
+            {
+                end.tv_nsec=end.tv_nsec-start.tv_nsec;
+            }
+            else
+            {
+                end.tv_sec=end.tv_sec-1;
+                end.tv_nsec=1000-(end.tv_nsec-start.tv_nsec);
+            }
+            results[i]=end;
         }
         printf("\nResults:\n");
         for(int i=0;i<max_thrds;i++)
         {
-            printf("Threads: %d time: %ld ms\n",i+1,(results[i]*1000)/CLOCKS_PER_SEC);
+            printf("Threads: %d time: %ld.%ld s\n",i+1,results[i].tv_sec,results[i].tv_nsec);
         }
     }
     else

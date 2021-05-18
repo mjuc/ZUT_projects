@@ -1,3 +1,6 @@
+//PS IN1 320 LAB05
+//Michał Jucewicz
+//jm44353@zut.edu.pl
 #include <unistd.h>
 #include <sys/types.h>
 #include <stdlib.h>
@@ -19,12 +22,16 @@ void handler(int no, siginfo_t *info, void *ucontext)
     time(&t);
     tm=localtime(&t);
     ended++;    
-    printf("Sender PID: %d\nEnded with: %d\nEnded at: %s\n",info->si_pid,info->si_status,asctime(tm));
-    wait=0;
+    printf("    Sender PID: %d\n    Ended with: %d\n    Ended at: %s\n",info->si_pid,info->si_status,asctime(tm));
 }
 void interrupt_handler(int no, siginfo_t *info, void *ucontext)
 {
     create_new=0;
+}
+
+void alarm_handler(int no, siginfo_t *info, void *ucontext)
+{
+    wait=0;
 }
 
 int main(int argc,char **argv)
@@ -69,26 +76,25 @@ int main(int argc,char **argv)
             children++;
             if(pid==0)
             {
+                srand(time(0));
                 sig.sa_sigaction=interrupt_handler;
                 sigaction(SIGINT,&sig,NULL);
-                random = rand()% max_duration;
+                random = (rand()% max_duration)+1;
                 int tmp=1;
                 int cpid=getpid();
                 time(&t);
                 tm=localtime(&t);
+                alarm(max_duration);
+                sig.sa_sigaction=alarm_handler;
+                sigaction(SIGALRM,&sig,NULL);
                 printf("Child PID: %d\nGenerated value: %d\nCreated at: %s\n",cpid,random,asctime(tm));
-                while (alarm(max_duration)!=0)
+                while (wait)
                 {
                     tmp+=tmp*tmp+1;
                 }
+                
                 exit(random);
                 
-            }
-            else
-            {
-                while (wait)
-                {}
-                wait=1;
             }
         }
         else

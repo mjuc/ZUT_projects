@@ -7,12 +7,11 @@ data=pd.read_csv('wine.data',sep=',')
 Y=data.iloc[:,0]
 X=data.iloc[:,[1,2,3,4,5,6,7,8,9,10,11,12,13]]
 
-bins=int(input("Number of classes: "))
-disc=prep.KBinsDiscretizer(n_bins=bins,strategy='uniform')
-
 dicreet=input("Use discreet nbc(y/n): ")
 if dicreet=='y':
     #6.1
+    bins=int(input("Number of classes: "))
+    disc=prep.KBinsDiscretizer(n_bins=bins,strategy='uniform')
     disc.fit(X)
     Xt=disc.transform(X)
     X_train, X_test, Y_train, Y_test = msl.train_test_split(Xt.toarray(), Y, test_size=0.5, random_state=0)

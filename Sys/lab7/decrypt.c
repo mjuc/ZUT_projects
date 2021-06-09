@@ -1,3 +1,6 @@
+//PS IN1 320 LAB07
+//Michał Jucewicz
+//jm44353@zut.edu.pl
 #define _GNU_SOURCE
 
 #include <sys/mman.h>

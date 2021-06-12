@@ -5,6 +5,7 @@ import matplotlib.pyplot as mpl
 
 MUTATION_RATE = 1
 MUTATION_REPEAT_COUNT = 2
+CROSSOVER_RATE = 70
 THRESHOLD = 850
 
 avg=[]
@@ -58,10 +59,31 @@ def TournamentSelection(population, k):
 def Reproduction(population):
     parent1 = TournamentSelection(population, 10).chromosomes
     parent2 = TournamentSelection(population, 6).chromosomes
-    while parent1 == parent2:
-        parent2 = TournamentSelection(population, 6).chromosomes
+    #while parent1 == parent2:
+    #    parent2 = TournamentSelection(population, 6).chromosomes
+    
+    if random.randrange(0, 100)<CROSSOVER_RATE:
+        return OrderOneCrossover(parent1, parent2)
+    else:
+        return CopyChromosomes(parent1,parent2)
 
-    return OrderOneCrossover(parent1, parent2)
+def CopyChromosomes(parent1,parent2):
+    size = len(parent1)
+    child = [-1] * size
+    
+    for i in range(size):
+        if random.randrange(0,1)==0:
+            child[i]=parent1[i]
+        else:
+            child[i]=parent2[i]
+    
+    if random.randrange(0, 100) < MUTATION_RATE:
+        child = SwapMutation(child)
+    
+    newGenome = Genome()
+    newGenome.chromosomes = child
+    newGenome.fitness = Evaluate(child)
+    return newGenome
 
 def OrderOneCrossover(parent1, parent2):
     size = len(parent1)
@@ -110,10 +132,29 @@ def SwapMutation(chromo):
         chromo[p2] = log
     return chromo
 
+def map(generation, allBestFitness, bestGenome, cityLoc):   
+    startPoint = None
+    for x, y in cityLoc:
+        if startPoint is None:
+            startPoint = cityLoc[0]
+            mpl.scatter(startPoint[0], startPoint[1], c="green", marker=">")
+            mpl.annotate("Origin", (x + 2, y - 4))
+        else:
+            mpl.scatter(x, y, c="black")
+
+    xx = [cityLoc[i][0] for i in bestGenome.chromosomes]
+    yy = [cityLoc[i][1] for i in bestGenome.chromosomes]
+
+    for x, y in zip(xx, yy):
+        mpl.text(x + 2, y - 2, str(yy.index(y)), color="green", fontsize=10)
+
+    mpl.plot(xx, yy, color="red", linewidth=1.75, linestyle="-")
+    mpl.show()
 
 def GeneticAlgorithm(popSize, maxGeneration):
     population = CreateNewPopulation(popSize)
     generation = 0
+
     while generation < maxGeneration:
         generation += 1
 
@@ -138,6 +179,8 @@ def GeneticAlgorithm(popSize, maxGeneration):
         print("Generation: {0}\nPopulation Size: {1}\t Average Fitness: {2}\nBest Fitness: {3}"
               .format(generation, len(population), averageFitness,
                       bestGenome.fitness))
+        if generation==1 or generation==150 or generation==maxGeneration:
+            map(generation,best_so_far,bestGenome,cityCoordinates)
     return generation
 
 g=GeneticAlgorithm(popSize=100, maxGeneration=300)

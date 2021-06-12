@@ -24,9 +24,13 @@ if lpl=='n':
     #gaussian bayes
     gnb=skn.GaussianNB()
     y_pred = gnb.fit(X_train, Y_train).predict(X_test)
+    prc=100-(X_test.shape[0]/((Y_test != y_pred).sum()))
     print("Number of mislabeled points out of a total %d points : %d" % (X_test.shape[0], (Y_test != y_pred).sum()))
+    print("Percentage of correctly labeld points: %d" % prc)
 else:
     #bayes with Laplace smoothing
     mnb=skn.MultinomialNB()
     y_pred = mnb.fit(X_train, Y_train).predict(X_test)
+    prc=100-(X_test.shape[0]/((Y_test != y_pred).sum()))
     print("Number of mislabeled points out of a total %d points : %d" % (X_test.shape[0], (Y_test != y_pred).sum()))
+    print("Percentage of correctly labeld points: %d" % prc)

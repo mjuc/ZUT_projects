@@ -1,10 +1,9 @@
-
 import numpy as np
 import random
 import math
 import matplotlib.pyplot as mpl
 
-MUTATION_RATE = 60
+MUTATION_RATE = 1
 MUTATION_REPEAT_COUNT = 2
 THRESHOLD = 850
 

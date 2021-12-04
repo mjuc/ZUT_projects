@@ -31,7 +31,7 @@ def dM(snd,n,Fs):
 
 def interp(snd,Fs,Fs2):
     T = (snd.size - 1)/Fs
-    t1 = np.linspace(0,T,len(snd)-1)
+    t1 = np.linspace(0,T,len(snd))
     xt = int((Fs2 * T) + 1)
     t2 = np.linspace(0,T,xt)
 
@@ -46,58 +46,51 @@ BITS = [4,8,16,24]
 FREQS = [2000,4000,8000,16000,24000,41000,16950]
 FILES = ['sin_60Hz.wav','sin_440Hz.wav','sin_8000Hz.wav','sin_combined.wav','sing_high1.wav','sing_high2.wav','sing_low1.wav','sing_low2.wav','sing_medium1.wav','sing_medium2.wav']
 
-# i = 0
-# for file in FILES:
-#     sound, fs = sf.read(file, dtype=np.int32)
-#     if i < 4:
-#         for bit in BITS:
-#             sf.write("{}_{}bit.wav".format(file,bit),bitRed(sound, bit),fs)
-#         for fr in FREQS:
-#             ns, nl = interp(sound,fs,fr)
-#             sf.write("lin{}_{}hz.wav".format(file,fr),ns,fr)
-#             sf.write("nonlin{}_{}hz.wav".format(file,fr),nl,fr)
-#     else:
-#         for bit in BITS:
-#             sf.write("{}_{}bit.wav".format(file,bit),bitRed(sound, bit),fs)
-#         for fr in FREQS:
-#             if fr != 16950:
-#                 ns, nl = interp(sound,fs,fr)
-#                 sf.write("lin{}_{}hz.wav".format(file,fr),ns,fr)
-#                 sf.write("nonlin{}_{}hz.wav".format(file,fr),nl,fr)
-#     i+=1
-
-# for file in FILES:
-#     sound, fs = sf.read(file,dtype = np.int32)
-#     nfs, res = dM(sound,4,fs)
-#     sf.write("{}_dec.wav".format(file),res,nfs)
-
-# PLOT_FILES = ['sin_60Hz.wav','sin_440Hz.wav','sin_8000Hz.wav','sin_combined.wav']
-# for file in PLOT_FILES:
-#     t = 500
-#     for bit in BITS:
-#         sound , fs = sf.read('{}_{}bit.wav'.format(file,bit))
-#         tmp = []
-#         for i in range(t):
-#             tmp.append(sound[i])
-#         plt.plot(np.linspace(0,t,t),tmp)
-#         plt.savefig("{}_{}bit_plot.jpg".format(file,bit))
-#     for freq in FREQS:
-#         lins, a = sf.read("lin{}_{}hz.wav".format(file,freq))
-#         nonlins, b = sf.read("nonlin{}_{}hz.wav".format(file,freq))
-#         lintmp = []
-#         nonlintmp = []
-#         for i in range(t):
-#             lintmp.append(lins[i])
-#             nonlintmp.append(nonlins[i])
-#         plt.plot(np.linspace(0,t,t),lintmp)
-#         plt.savefig("lin{}_{}hz_plot.jpg".format(file,freq))
-#         plt.plot(np.linspace(0,t,t),nonlintmp)
-#         plt.savefig("nonlin{}_{}hz_plot.jpg".format(file,freq))
-
-sound, fs = sf.read("sin_60Hz.wav_dec.wav")
-t = 500
-tmp = []
-for i in range(t):
-    tmp.append(sound[i])
-plt.plot(np.linspace(0,t,t),tmp)
-plt.savefig("sin_60Hz.wav_dec.wav_plot.jpg")
+i = 0
+fsize=2**8
+for file in FILES:
+    print(file)
+    sound, fs = sf.read(file, dtype=np.int32)
+    plt.plot(np.arange(0,sound.shape[0])/fs,sound)
+    plt.savefig("{}org.jpg".format(file))
+    tmp = fftpack.fft(sound,fsize)
+    plt.plot(np.arange(0,fs/2,fs/fsize),20*np.log10(np.abs(tmp[:fsize//2])))
+    plt.savefig("{}plot.jpg".format(file))
+    nfs, res = dM(sound,4,fs)
+    sf.write("{}_dec.wav".format(file),res,nfs)
+    plt.plot(np.arange(0,nfs/2,nfs/fsize),20*np.log10(np.abs(res[:fsize//2])))
+    plt.savefig("{}_dec.wav_plot.jpg".format(file))
+    if i < 4:
+        for bit in BITS:
+            sf.write("{}_{}bit.wav".format(file,bit),bitRed(sound, bit),fs)
+            tmp = fftpack.fft(bitRed(sound, bit),fsize)
+            plt.plot(np.arange(0,fs/2,fs/fsize),20*np.log10(np.abs(tmp[:fsize//2])))
+            plt.savefig("{}_{}plot.jpg".format(file,bit))
+        for fr in FREQS:
+            ns, nl = interp(sound,fs,fr)
+            sf.write("lin{}_{}hz.wav".format(file,fr),ns,fr)
+            sf.write("nonlin{}_{}hz.wav".format(file,fr),nl,fr)
+            lins = fftpack.fft(ns,fsize)
+            nonlins = fftpack.fft(nl,fsize)
+            plt.plot(np.arange(0,fs/2,fs/fsize),20*np.log10(np.abs(lins[:fsize//2])))
+            plt.savefig("lin{}_{}hz_plot.jpg".format(file,fr))
+            plt.plot(np.arange(0,fs/2,fs/fsize),20*np.log10(np.abs(nonlins[:fsize//2])))
+            plt.savefig("nonlin{}_{}hz_plot.jpg".format(file,fr))
+    else:
+        for bit in BITS:
+            sf.write("{}_{}bit.wav".format(file,bit),bitRed(sound, bit),fs)
+            tmp = fftpack.fft(bitRed(sound, bit),fsize)
+            plt.plot(np.arange(0,fs/2,fs/fsize),20*np.log10(np.abs(tmp[:fsize//2])))
+            plt.savefig("{}_{}plot.jpg".format(file,bit))
+        for fr in FREQS:
+            if fr != 16950:
+                ns, nl = interp(sound,fs,fr)
+                sf.write("lin{}_{}hz.wav".format(file,fr),ns,fr)
+                sf.write("nonlin{}_{}hz.wav".format(file,fr),nl,fr)
+                lins = fftpack.fft(ns,fsize)
+                nonlins = fftpack.fft(nl,fsize)
+                plt.plot(np.arange(0,fs/2,fs/fsize),20*np.log10(np.abs(lins[:fsize//2])))
+                plt.savefig("lin{}_{}hz_plot.jpg".format(file,fr))
+                plt.plot(np.arange(0,fs/2,fs/fsize),20*np.log10(np.abs(nonlins[:fsize//2])))
+                plt.savefig("nonlin{}_{}hz_plot.jpg".format(file,fr))
+    i+=1

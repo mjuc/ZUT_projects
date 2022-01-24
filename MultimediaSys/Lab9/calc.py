@@ -1,38 +1,38 @@
 import math
-from re import A
+import numpy as np
 
 MB = 1048576
 GB = 1073741824
 TB = 1099511627776
 
 def a4Amount(bytes):
-    maxBytesPerUnit = 8840
-    res = bytes/maxBytesPerUnit
+    maxMBytesperUnit = 8840/MB
+    res = bytes/maxMBytesperUnit
     return(math.ceil(res))
 
 def hddAmount(bytes):
-    maxBytesPerUnit = 4 * TB
-    res = bytes/maxBytesPerUnit
+    maxMBytesperUnit = (4 * TB)/MB
+    res = bytes/maxMBytesperUnit
     return(math.ceil(res))
 
 def ssdAmount(bytes):
-    maxBytesPerUnit = TB
-    res = bytes/maxBytesPerUnit
+    maxMBytesperUnit = TB/MB
+    res = bytes/maxMBytesperUnit
     return(math.ceil(res))
 
 def cdAmount(bytes):
-    maxBytesPerUnit = 700 * MB
-    res = bytes/maxBytesPerUnit
+    maxMBytesperUnit = 700
+    res = bytes/maxMBytesperUnit
     return(math.ceil(res))
 
 def dvdAmount(bytes):
-    maxBytesPerUnit = 4.7 * GB
-    res = bytes/maxBytesPerUnit
+    maxMBytesperUnit = (4.7 * GB)/MB
+    res = bytes/maxMBytesperUnit
     return(math.ceil(res))
 
 def microSDAmount(bytes):
-    maxBytesPerUnit = 64 * GB
-    res = bytes/maxBytesPerUnit
+    maxMBytesperUnit = (64 * GB)/MB
+    res = bytes/maxMBytesperUnit
     return(math.ceil(res))
     
 def aggregateData(bytes):
@@ -105,11 +105,11 @@ print("Full HD video 1,5h long")
 bytes = 3 * 2073600 * 30 * 3600 * 1.5
 print(bytes, " B")
 aggregateData(bytes)
-print("4K video 1,5h long")
-bytes = 3 * 8847360 * 30 * 3600 * 1,5
-print(bytes, " B")
-aggregateData(bytes)
-print("YouTube videos added in one day assuming average video is Full HD")
-bytes = 500 * 3600 * 3 * 2073600 * 30 * 24 * 3600
-print(bytes/TB, " TB")
-aggregateData(bytes)
+# print("4K video 1,5h long")
+# bytes = 3 * (8847360/TB) * 30 * 3600 * 1,5
+# print(bytes.astype(np.float32), " B")
+# aggregateData(bytes.astype(np.float32))
+# print("YouTube videos added in one day assuming average video is Full HD")
+# bytes = 500 * 3600 * 3 * 2073600 * 30 * 24 * 3600
+# print(bytes.astype(np.float32)/TB, " TB")
+# aggregateData(bytes)
